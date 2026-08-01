@@ -1,4 +1,4 @@
-package com.example.wardrobe
+﻿package com.fitcheck.app
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Wardrobe</string>
+	<string>FitCheck</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,11 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>wardrobe</string>
+	<string>fitcheck</string>
+	<key>NSCameraUsageDescription</key>
+	<string>FitCheck uses the camera to photograph a clothing item so it can read its colour, pattern and fabric. FitCheck does not keep the photo — but it is sent to Google's Gemini service for analysis, and on the free tier Google may retain it to improve their products.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>FitCheck reads a photo you choose so it can identify the clothing item. FitCheck does not keep the photo — but it is sent to Google's Gemini service for analysis, and on the free tier Google may retain it to improve their products.</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

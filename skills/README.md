@@ -1,6 +1,6 @@
 # Skills
 
-Process skills for building the outfit-planner app defined in
+Process skills for building **FitCheck**, the outfit-planner app defined in
 [wardrobe_app_PRD.md](../wardrobe_app_PRD.md) and [wardrobe_app_TRD.md](../wardrobe_app_TRD.md).
 
 | Skill | Owns |
@@ -62,10 +62,11 @@ must not be guessed at.
 
 ```mermaid
 graph TD
-  D0["OPEN: app name"] --> P0[project rename + branding]
-  D1["OPEN: extraction engine<br/>(vision LLM vs fine-tuned CNN)"] --> B1[extraction service]
-  D2["OPEN: build scope<br/>(Flutter only vs full stack)"] --> B0[backend exists at all?]
-  D3["OPEN: Supabase project + keys"] --> M1
+  D0["DECIDED: name = FitCheck"] --> P0[project rename + branding]
+  D1["DECIDED: extraction = Gemini vision, free tier"] --> B1[extraction service]
+  D2["DECIDED: scope = full stack"] --> B0[Flutter + migrations + FastAPI]
+  D3["OPEN: Supabase URL + anon key"] --> M1
+  D4["OPEN: Gemini API key"] --> B1
 
   P0 --> UI1[design tokens + theme]
   UI1 --> UI2[screens]
@@ -99,15 +100,29 @@ patched at the leaf.
 
 ## Status of the source documents
 
-These are recorded here so no skill silently resolves them. They are **user decisions**, not
-implementation details.
+Recorded here so no skill silently resolves them. These are **user decisions**, not implementation
+details. Decided rows carry the decision; open rows must still be escalated, never guessed.
 
-| # | Issue | Where |
-|---|---|---|
-| 1 | PRD §7 lists "Male-specific styling recommendation module" as **out of scope**, but PRD §4.1/§4.5 and TRD §7/§8 all **specify it**. Direct contradiction. | PRD §7 vs §4.5 |
-| 2 | PRD §4.4(b) requires detecting *multiple* garments in one uploaded photo. That is object detection + per-instance classification, materially harder than TRD §4's single-item pipeline. TRD §4 does not describe it. | PRD §4.4 vs TRD §4 |
-| 3 | PRD §6 requires offline wardrobe browsing. No local persistence layer appears anywhere in the TRD. | PRD §6 vs TRD §10 |
-| 4 | TRD §3 stores one `color_hex` per item. A striped or floral garment has no single dominant colour; averaging produces a colour the garment does not contain, which then feeds the §6 harmony rule. | TRD §3, §6 |
-| 5 | TRD §2 specifies a fine-tuned CNN, while TRD §12 concedes no training data exists for the non-Western categories the PRD requires. | TRD §2 vs §12 |
-| 6 | PRD §9 asks whether occasion presets must include religious/cultural wear. This determines the `occasion` enum, which the compatibility rules key off. | PRD §9 |
-| 7 | Item deletion behaviour is unspecified: what happens to an `outfits` row whose `wardrobe_item` was deleted. | TRD §3 |
+| # | Issue | Where | Status |
+|---|---|---|---|
+| 1 | PRD §7 lists "Male-specific styling recommendation module" as **out of scope**, but PRD §4.1/§4.5 and TRD §7/§8 all **specify it**. Direct contradiction. | PRD §7 vs §4.5 | ✅ **DECIDED — build it.** §7 is stale and has been corrected in the PRD. Ship the signup opt-in and the gated accessory recommendation. |
+| 2 | PRD §4.4(b) requires detecting *multiple* garments in one uploaded photo. That is object detection + per-instance classification, materially harder than TRD §4's single-item pipeline. TRD §4 does not describe it. | PRD §4.4 vs TRD §4 | ⚠️ **OPEN.** Now partly mitigated: the chosen extractor (a vision LLM, see #5) can return multiple garments from one image in a single call, which a CNN classifier could not. Still needs its own contract and validation. |
+| 3 | PRD §6 requires offline wardrobe browsing. No local persistence layer appears anywhere in the TRD. | PRD §6 vs TRD §10 | ⚠️ **OPEN — gap in the TRD.** Being closed by adding a local cache to the Flutter data layer. Not a user decision; a missing spec. |
+| 4 | TRD §3 stores one `color_hex` per item. A striped or floral garment has no single dominant colour; averaging produces a colour the garment does not contain, which then feeds the §6 harmony rule. | TRD §3, §6 | ✅ **DECIDED — palette + LAB.** Store up to 3 weighted colours plus precomputed CIELAB; keep `color_hex` as the dominant colour for display. Harmony scored by CIEDE2000, not HSV distance. Deviates from TRD §3. |
+| 5 | TRD §2 specifies a fine-tuned CNN, while TRD §12 concedes no training data exists for the non-Western categories the PRD requires. | TRD §2 vs §12 | ✅ **DECIDED — vision LLM (Gemini), free tier.** Supersedes TRD §2's CNN. See the privacy consequence below. |
+| 6 | PRD §9 asks whether occasion presets must include religious/cultural wear. This determines the `occasion` enum, which the compatibility rules key off. | PRD §9 | ✅ **DECIDED — Western + South Asian.** Vocabulary fixed in [database](database/SKILL.md) §2. |
+| 7 | Item deletion behaviour is unspecified: what happens to an `outfits` row whose `wardrobe_item` was deleted. | TRD §3 | ⚠️ **OPEN.** Implemented as soft delete (`deleted_at`) so saved outfit history is never silently mutated — this is the only option that is reversible if the decision goes the other way. Confirm before release. |
+
+### Consequence of decision #5: the privacy claim must change
+
+Google's **free** Gemini tier uses submitted content to improve its products, and human reviewers
+may see it. Paid Gemini/Vertex does not. The free tier was chosen deliberately, so:
+
+- PRD §4.2's "Original photo is not kept" is **true of FitCheck's own systems** and **not true of
+  the extraction provider**. The PRD line has been corrected accordingly.
+- Every user-facing surface that mentions photo handling must say so plainly. The
+  [ui-ux-design](ui-ux-design/SKILL.md) skill treats this as required copy, not optional.
+- [independent-validation](independent-validation/SKILL.md) row `PRD-4.2-a` now validates the
+  *corrected* claim: no original image on FitCheck's disk, storage, or logs — and the presence of
+  honest disclosure in the UI. It must not be marked `PASS` on the old wording.
+- Reversing this later is a one-line change (billing-enabled key) plus reverting the copy.

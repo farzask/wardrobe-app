@@ -1,1 +1,24 @@
 include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    # A view that silently swallows a failed future shows the user a frozen screen with no
+    # explanation. Promoted to an error so it cannot be merged.
+    unawaited_futures: error
+    # The vocabularies are closed sets by design (see lib/core/vocabulary/). A switch that misses a
+    # case must fail the build, not fall through — that is the whole point of closing them.
+    missing_enum_constant_in_switch: error
+
+linter:
+  rules:
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
+    - avoid_print
+    - require_trailing_commas
+    - use_super_parameters
+    - sort_child_properties_last
+    # Colour and spacing must come from the token files, and an inline value is easiest to spot
+    # when literals stand out.
+    - unnecessary_this
+    - always_declare_return_types

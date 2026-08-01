@@ -1,5 +1,5 @@
-name: wardrobe
-description: "A new Flutter project."
+name: fitcheck
+description: "FitCheck — digitize your wardrobe as attributes, not photos, and get a second opinion on any outfit."
 publish_to: 'none'
 version: 0.1.0+1
 
@@ -7,8 +7,20 @@ environment:
   sdk: ^3.11.4
 
 dependencies:
+  cached_network_image: ^3.4.1
+  collection: ^1.19.1
+  connectivity_plus: ^7.3.1
   flutter:
     sdk: flutter
+  http: ^1.6.0
+  image: ^4.8.0
+  image_picker: ^1.2.3
+  path: ^1.9.1
+  path_provider: ^2.1.6
+  provider: ^6.1.5+1
+  sqflite: ^2.4.2+1
+  supabase_flutter: ^2.16.0
+  uuid: ^4.6.0
 
 dev_dependencies:
   flutter_test:

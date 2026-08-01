@@ -43,3 +43,19 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Secrets — see supabase/SETUP.md §2.
+# SUPABASE_SERVICE_ROLE_KEY bypasses every RLS policy in migrations 002-007.
+.env
+.env.*
+!.env.example
+
+# Python backend
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.pytest_cache/
+backend/.ruff_cache/
+
+*.md 
+/skills

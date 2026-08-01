@@ -23,7 +23,8 @@ A Flutter app (iOS + Android) that digitizes a user's wardrobe as structured att
 ### 4.2 Wardrobe Digitization
 - User photographs or uploads an image of a clothing item.
 - App sends the image to the backend, which extracts structured attributes (category, style, color, pattern, fabric, sleeve, neckline, fit, season, occasion) and generates a small thumbnail.
-- Original photo is not kept — only the thumbnail + attributes are saved (see TRD for the storage pipeline).
+- Original photo is not kept **by FitCheck** — only the thumbnail + attributes are saved (see TRD for the storage pipeline).
+- **Disclosure (corrected 2026-08-01):** the image is sent to a third-party vision model for attribute extraction. On the free Google Gemini tier — the tier this build uses — Google may retain submitted content to improve its products, and human reviewers may see it. FitCheck itself retains nothing, but the end-to-end claim is *not* "your photo is never seen by anyone." This must be stated plainly in-product at the capture step. Moving to a paid Gemini/Vertex key removes the third-party retention and lets this disclosure be dropped.
 - User can review/edit the auto-detected attributes before saving (correct a misclassified color, etc.).
 
 ### 4.3 Wardrobe Browsing
@@ -66,7 +67,7 @@ Shown alongside outfit evaluation (4.4), branching by profile gender:
 - Sharing wardrobes/outfits between accounts.
 - Virtual try-on / AR visualization.
 - Shopping integration or purchase links.
-- Male-specific styling recommendation module (not requested).
+- ~~Male-specific styling recommendation module (not requested).~~ **Corrected 2026-08-01 — this line was stale and contradicted §4.1, §4.5, TRD §7 and TRD §8, all of which specify the module. The male accessory path IS in v1 scope**, gated on the `wears_accessories` opt-in collected at signup.
 - Laundry/wear-tracking or cost-per-wear analytics (not requested).
 
 ## 8. Success Signals (informal, personal/friends-family scale)
