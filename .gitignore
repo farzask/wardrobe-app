@@ -45,7 +45,12 @@ app.*.map.json
 /android/app/release
 
 # Secrets — see supabase/SETUP.md §2.
-# SUPABASE_SERVICE_ROLE_KEY bypasses every RLS policy in migrations 002-007.
+#
+# Two files, two audiences:
+#   .env          Flutter. BUNDLED INTO THE APP as an asset — public values only.
+#   backend/.env  Python. Holds SUPABASE_JWT_SECRET and GEMINI_API_KEY.
+#
+# These patterns have no slash, so they match at any depth and cover both.
 .env
 .env.*
 !.env.example

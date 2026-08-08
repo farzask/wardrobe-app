@@ -22,8 +22,19 @@ documents. Nothing in this repo silently resolves a spec contradiction — they 
 
 ## Setup
 
-See [supabase/SETUP.md](supabase/SETUP.md) for the database and [backend/README.md](backend/README.md)
-for the service. Neither has committed credentials; both read from a gitignored `.env`.
+```
+cp .env.example .env                    # Flutter — public values only
+cp backend/.env.example backend/.env    # Python  — secrets
+flutter run                             # no --dart-define needed
+```
+
+Full instructions in [supabase/SETUP.md](supabase/SETUP.md) for the database and
+[backend/README.md](backend/README.md) for the service. Nothing here has committed credentials.
+
+**The two `.env` files are not interchangeable.** The root one is bundled into the app as an asset
+and ships inside the APK, so it holds only `SUPABASE_URL`, `SUPABASE_ANON_KEY` and `BACKEND_URL` —
+all public. `SUPABASE_JWT_SECRET` and `GEMINI_API_KEY` live in `backend/.env` and never reach a
+client build. The app refuses to launch if it finds a server secret in its own `.env`.
 
 ## Privacy — read this before shipping
 

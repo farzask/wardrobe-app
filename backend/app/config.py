@@ -21,6 +21,20 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from functools import lru_cache
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+# Loaded from `backend/.env`, deliberately NOT from the repo-root `.env`.
+#
+# The root file is bundled into the Flutter app as an asset and ships to every phone. Pointing this
+# service at it would mean SUPABASE_JWT_SECRET and GEMINI_API_KEY had to live in a file that gets
+# extracted from the APK — and the JWT secret lets its holder mint a valid token for any user. Two
+# files, two audiences.
+#
+# Real environment variables win over the file, so a deployment that injects config (Railway,
+# Render, Fly) needs no .env at all.
+load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
 
 
 class ConfigError(RuntimeError):

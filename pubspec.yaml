@@ -12,6 +12,7 @@ dependencies:
   connectivity_plus: ^7.3.1
   flutter:
     sdk: flutter
+  flutter_dotenv: ^6.0.1
   http: ^1.6.0
   image: ^4.8.0
   image_picker: ^1.2.3
@@ -29,3 +30,13 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    # Read at startup by flutter_dotenv so `flutter run` needs no --dart-define arguments.
+    #
+    # This BUNDLES the file into the app, where it can be extracted from the build. Only the three
+    # public values belong in it — SUPABASE_URL, SUPABASE_ANON_KEY, BACKEND_URL. Server secrets go
+    # in backend/.env; main.dart refuses to launch if it finds one here.
+    #
+    # `flutter build` fails if this file does not exist. Copy .env.example to .env after cloning.
+    - .env

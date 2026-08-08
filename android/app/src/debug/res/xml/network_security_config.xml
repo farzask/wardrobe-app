@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DEBUG BUILDS ONLY. This file lives in src/debug, so the manifest merger applies it to debug
+  builds and never to release ones — a release APK keeps Android's default, which refuses
+  cleartext HTTP outright.
+
+  Why it is needed: from Android 9 (API 28) plain-HTTP traffic is blocked by default. The FitCheck
+  backend runs locally over http:// during development — http://10.0.2.2:8000 from the emulator, or
+  a LAN address like http://192.168.x.x:8000 from a physical device on the same wifi — and every
+  request would otherwise fail with a cleartext-not-permitted error that does not obviously point
+  at this setting.
+
+  When the backend is deployed behind HTTPS, nothing here changes: release builds already require
+  it.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>
