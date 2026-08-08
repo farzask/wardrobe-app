@@ -75,46 +75,40 @@ class FitCheckApp extends StatelessWidget {
         theme: AppTheme.light(),
         darkTheme: AppTheme.dark(),
         themeMode: ThemeMode.system,
+        // The per-user view models go here, NOT under `home`.
+        //
+        // `builder` receives MaterialApp's Navigator as its child, so anything wrapped here is an
+        // ancestor of every route. Providers placed under `home` instead are siblings of pushed
+        // routes, not ancestors — `Navigator.push` mounts onto the Navigator, so a pushed screen
+        // can never see them and throws ProviderNotFoundException. That is not a hot-reload
+        // artefact; it is structural, and it only shows up the first time you navigate.
+        builder: (context, navigator) => _UserScope(child: navigator!),
         home: const _Router(),
       ),
     );
   }
 }
 
-/// Routes on auth + onboarding state.
+/// Per-user view models, installed above the Navigator so every route can reach them.
 ///
-/// One switch over [AuthStage] rather than a set of nested conditionals, so "signed in but
-/// mid-onboarding" resolves to exactly one destination and cannot fall between cases.
-class _Router extends StatelessWidget {
-  const _Router();
+/// Keyed by user id so signing in as someone else builds a fresh set rather than reusing the
+/// previous account's. That also tears down and rebuilds the Navigator, which clears any routes
+/// left over from the previous session — a wardrobe screen surviving a sign-out would otherwise
+/// keep rendering the old user's items.
+class _UserScope extends StatelessWidget {
+  const _UserScope({required this.child});
+
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthViewModel>();
+    final userId = context.watch<AuthViewModel>().userId;
 
-    return switch (auth.stage) {
-      AuthStage.resolving => const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
-      AuthStage.signedOut => const SignInView(),
-      AuthStage.needsGender => const GenderSelectView(),
-      AuthStage.needsAccessoryAnswer => const AccessoryOptInView(),
-      AuthStage.ready => _SignedIn(userId: auth.userId!),
-    };
-  }
-}
+    // Signed out: the auth and onboarding screens need none of this, and building a
+    // WardrobeViewModel without a user id is not possible anyway.
+    if (userId == null) return child;
 
-/// Per-user scopes live below the router so they are rebuilt from scratch on sign-out and cannot
-/// leak one account's wardrobe into the next session.
-class _SignedIn extends StatelessWidget {
-  const _SignedIn({required this.userId});
-
-  final String userId;
-
-  @override
-  Widget build(BuildContext context) {
     return MultiProvider(
-      // Keyed by user id: signing in as someone else replaces these rather than reusing them.
       key: ValueKey(userId),
       providers: [
         ChangeNotifierProvider(
@@ -139,8 +133,33 @@ class _SignedIn extends StatelessWidget {
           ),
         ),
       ],
-      child: const WardrobeHomeView(),
+      child: child,
     );
+  }
+}
+
+/// Routes on auth + onboarding state.
+///
+/// One switch over [AuthStage] rather than a set of nested conditionals, so "signed in but
+/// mid-onboarding" resolves to exactly one destination and cannot fall between cases.
+class _Router extends StatelessWidget {
+  const _Router();
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthViewModel>();
+
+    return switch (auth.stage) {
+      AuthStage.resolving => const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        ),
+      AuthStage.signedOut => const SignInView(),
+      AuthStage.needsGender => const GenderSelectView(),
+      AuthStage.needsAccessoryAnswer => const AccessoryOptInView(),
+      // The per-user providers are installed by _UserScope above the Navigator, so this only has
+      // to name the screen.
+      AuthStage.ready => const WardrobeHomeView(),
+    };
   }
 }
 

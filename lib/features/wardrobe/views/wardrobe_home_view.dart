@@ -11,6 +11,7 @@ import '../../../core/widgets/fc_widgets.dart';
 import '../../../core/widgets/item_card.dart';
 import '../../auth/viewmodels/auth_viewmodel.dart';
 import '../../outfit/views/outfit_builder_view.dart';
+import '../viewmodels/add_item_viewmodel.dart';
 import '../viewmodels/wardrobe_viewmodel.dart';
 import 'add_item_view.dart';
 import 'item_detail_view.dart';
@@ -36,6 +37,11 @@ class _WardrobeHomeViewState extends State<WardrobeHomeView> {
   }
 
   Future<void> _openAddItem() async {
+    // The view model outlives this route, so it still holds the last garment's draft and its
+    // `done` stage. Without this, a second "Add item" opens straight onto the previous item's
+    // review screen instead of the camera.
+    context.read<AddItemViewModel>().reset();
+
     final added = await Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (_) => const AddItemView()),
     );
@@ -179,13 +185,12 @@ class _WardrobeHomeViewState extends State<WardrobeHomeView> {
   }
 
   void _openFilters(BuildContext context) {
+    // No .value wrapper needed: the sheet is a route on the same Navigator that _UserScope sits
+    // above, so it reaches WardrobeViewModel directly. Proved in test/provider_scope_test.dart.
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      builder: (_) => ChangeNotifierProvider.value(
-        value: context.read<WardrobeViewModel>(),
-        child: const _FilterSheet(),
-      ),
+      builder: (_) => const _FilterSheet(),
     );
   }
 }
